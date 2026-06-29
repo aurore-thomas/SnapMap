@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="photo-detail-content" color="dark">
+  <div class="photo-wrapper">
+    <img [src]="currentPhoto.webviewPath" alt="Photo" class="fullscreen-photo" />
+
+    <!-- Navigation carousel -->
+    <button class="nav-btn nav-prev" (click)="previous()" [disabled]="!hasPrevious">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+    <button class="nav-btn nav-next" (click)="next()" [disabled]="!hasNext">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </button>
+
+    <!-- Indicator dots -->
+    <div class="carousel-dots" *ngIf="photos.length > 1">
+      <span
+        class="dot"
+        *ngFor="let p of photos; let i = index"
+        [class.active]="i === currentIndex">
+      </span>
+    </div>
+  </div>
+
+  <!-- Metadata -->
+  <div class="photo-meta">
+    <div class="meta-row">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>{{ currentPhoto.timestamp | date:'d MMMM yyyy, HH:mm':'':'fr' }}</span>
+    </div>
+    <div class="meta-row">
+      <ion-icon name="location-outline"></ion-icon>
+      <ion-spinner *ngIf="isLoadingAddress" name="dots"></ion-spinner>
+      <span *ngIf="!isLoadingAddress">{{ address }}</span>
+    </div>
+  </div>
+</ion-content>

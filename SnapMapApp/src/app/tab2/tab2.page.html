@@ -1,17 +1,31 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Carte</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="map-content">
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <!-- Conteneur de la carte Mapbox -->
+  <div #mapContainer class="map-container"></div>
+
+  <!-- Indicateur de chargement -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Chargement de la carte…</p>
+  </div>
+
+  <!-- Message de géolocalisation refusée -->
+  <div class="geo-error-banner" *ngIf="geoError && !isLoading">
+    <ion-icon name="warning-outline"></ion-icon>
+    <span>Position par défaut (géolocalisation refusée)</span>
+  </div>
+
+  <!-- Bouton rafraîchir les marqueurs -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="refreshMap()" size="small" color="light">
+      <ion-icon name="refresh-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
 </ion-content>

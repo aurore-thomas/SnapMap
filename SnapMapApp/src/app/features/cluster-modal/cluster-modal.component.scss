@@ -1,0 +1,16 @@
+.cluster-photo-col {
+  padding: 4px;
+  cursor: pointer;
+}
+
+.cluster-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
