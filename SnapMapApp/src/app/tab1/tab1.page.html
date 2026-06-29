@@ -7,15 +7,38 @@
 <ion-content [fullscreen]="true">
 
   <!-- Galerie de photos -->
-  <ion-grid *ngIf="photoService.photos.length > 0; else emptyState">
+  <ion-grid *ngIf="photoService.photos.length > 0 || isTaking; else emptyState">
     <ion-row>
+
+      <!-- Skeleton card pendant la capture -->
+      <ion-col size="4" *ngIf="isTaking" class="photo-col">
+        <div class="skeleton-card">
+          <ion-skeleton-text animated="true" class="skeleton-img"></ion-skeleton-text>
+          <ion-spinner name="crescent" class="skeleton-spinner"></ion-spinner>
+        </div>
+      </ion-col>
+
+      <!-- Photos existantes -->
       <ion-col
         size="4"
         *ngFor="let photo of photoService.photos"
         (click)="openDetail(photo)"
         class="photo-col">
-        <img [src]="photo.webviewPath" alt="Photo" class="gallery-thumb" />
+        <div class="photo-thumb-wrapper">
+          <img [src]="photo.webviewPath" alt="Photo" class="gallery-thumb" />
+
+          <!-- Bouton like -->
+          <button class="thumb-btn like-btn" (click)="toggleLike(photo, $event)">
+            <ion-icon [name]="photo.liked ? 'heart' : 'heart-outline'" [class.liked]="photo.liked"></ion-icon>
+          </button>
+
+          <!-- Bouton supprimer -->
+          <button class="thumb-btn delete-btn" (click)="confirmDelete(photo, $event)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </div>
       </ion-col>
+
     </ion-row>
   </ion-grid>
 

@@ -5,9 +5,14 @@ import {
   IonIcon, IonSpinner, ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, chevronBackOutline, chevronForwardOutline, locationOutline, calendarOutline } from 'ionicons/icons';
+import {
+  closeOutline, chevronBackOutline, chevronForwardOutline,
+  locationOutline, calendarOutline, trashOutline, heartOutline, heart
+} from 'ionicons/icons';
 import { UserPhoto } from '../../core/models/user-photo.model';
 import { MapService } from '../../core/services/map.service';
+import { PhotoService } from '../../core/services/photo';
+import { AlertController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-photo-detail',
@@ -28,11 +33,18 @@ export class PhotoDetailComponent implements OnInit {
   address = '';
   isLoadingAddress = true;
 
+  private touchStartX = 0;
+
   constructor(
     private modalController: ModalController,
-    private mapService: MapService
+    private alertController: AlertController,
+    private mapService: MapService,
+    private photoService: PhotoService
   ) {
-    addIcons({ closeOutline, chevronBackOutline, chevronForwardOutline, locationOutline, calendarOutline });
+    addIcons({
+      closeOutline, chevronBackOutline, chevronForwardOutline,
+      locationOutline, calendarOutline, trashOutline, heartOutline, heart
+    });
   }
 
   get currentPhoto(): UserPhoto {
@@ -66,6 +78,18 @@ export class PhotoDetailComponent implements OnInit {
     }
   }
 
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].clientX;
+  }
+
+  async onTouchEnd(event: TouchEvent): Promise<void> {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(deltaX) > 50) {
+      if (deltaX > 0) await this.previous();
+      else await this.next();
+    }
+  }
+
   async loadAddress(): Promise<void> {
     this.isLoadingAddress = true;
     this.address = await this.mapService.reverseGeocode(
@@ -73,6 +97,29 @@ export class PhotoDetailComponent implements OnInit {
       this.currentPhoto.longitude
     );
     this.isLoadingAddress = false;
+  }
+
+  async toggleLike(): Promise<void> {
+    await this.photoService.toggleLike(this.currentPhoto);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Supprimer la photo',
+      message: 'Êtes-vous sûr de vouloir supprimer cette photo définitivement ?',
+      buttons: [
+        { text: 'Annuler', role: 'cancel' },
+        {
+          text: 'Supprimer',
+          role: 'destructive',
+          handler: async () => {
+            await this.photoService.deletePhoto(this.currentPhoto);
+            this.modalController.dismiss({ deleted: true });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   dismiss(): void {

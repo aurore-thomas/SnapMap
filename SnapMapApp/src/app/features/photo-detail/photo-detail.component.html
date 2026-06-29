@@ -1,6 +1,15 @@
 <ion-header>
   <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-button (click)="toggleLike()">
+        <ion-icon slot="icon-only" [name]="currentPhoto.liked ? 'heart' : 'heart-outline'"
+          [style.color]="currentPhoto.liked ? '#ff4d6d' : 'white'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-buttons slot="end">
+      <ion-button (click)="confirmDelete()">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="dismiss()">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
       </ion-button>
@@ -9,7 +18,10 @@
 </ion-header>
 
 <ion-content class="photo-detail-content" color="dark">
-  <div class="photo-wrapper">
+  <div class="photo-wrapper"
+       (touchstart)="onTouchStart($event)"
+       (touchend)="onTouchEnd($event)">
+
     <img [src]="currentPhoto.webviewPath" alt="Photo" class="fullscreen-photo" />
 
     <!-- Navigation carousel -->

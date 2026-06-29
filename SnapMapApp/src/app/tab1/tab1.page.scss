@@ -3,16 +3,79 @@
   cursor: pointer;
 }
 
-.gallery-thumb {
+.photo-thumb-wrapper {
+  position: relative;
   width: 100%;
   aspect-ratio: 1;
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 4px;
+  display: block;
   transition: transform 0.15s ease;
 
   &:active {
     transform: scale(0.95);
   }
+}
+
+.thumb-btn {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  backdrop-filter: blur(2px);
+}
+
+.like-btn {
+  top: 4px;
+  right: 4px;
+
+  ion-icon.liked {
+    color: #ff4d6d;
+  }
+}
+
+.delete-btn {
+  bottom: 4px;
+  right: 4px;
+}
+
+.skeleton-card {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skeleton-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  --border-radius: 4px;
+}
+
+.skeleton-spinner {
+  position: relative;
+  z-index: 1;
+  color: var(--ion-color-medium);
 }
 
 .empty-state {

@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonGrid, IonRow, IonCol, IonFab, IonFabButton,
-  IonIcon, IonSpinner, ModalController, ToastController
+  IonIcon, IonSpinner, IonSkeletonText,
+  ModalController, ToastController, AlertController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cameraOutline, imageOutline } from 'ionicons/icons';
+import {
+  cameraOutline, imageOutline, heartOutline, heart, trashOutline
+} from 'ionicons/icons';
 import { PhotoService } from '../core/services/photo';
 import { UserPhoto } from '../core/models/user-photo.model';
 import { PhotoDetailComponent } from '../features/photo-detail/photo-detail.component';
@@ -20,7 +23,7 @@ import { PhotoDetailComponent } from '../features/photo-detail/photo-detail.comp
     CommonModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonGrid, IonRow, IonCol, IonFab, IonFabButton,
-    IonIcon, IonSpinner
+    IonIcon, IonSpinner, IonSkeletonText
   ]
 })
 export class Tab1Page implements OnInit {
@@ -29,9 +32,10 @@ export class Tab1Page implements OnInit {
   constructor(
     public photoService: PhotoService,
     private modalController: ModalController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertController: AlertController
   ) {
-    addIcons({ cameraOutline, imageOutline });
+    addIcons({ cameraOutline, imageOutline, heartOutline, heart, trashOutline });
   }
 
   async ngOnInit(): Promise<void> {
@@ -40,11 +44,26 @@ export class Tab1Page implements OnInit {
 
   async takePhoto(): Promise<void> {
     this.isTaking = true;
-    const photo = await this.photoService.takePhoto();
-    this.isTaking = false;
-
-    if (!photo) {
-      await this.showToast('Impossible de prendre une photo.', 'danger');
+    try {
+      await this.photoService.takePhoto();
+      await this.showToast('Photo enregistrée !', 'success');
+    } catch (error: unknown) {
+      const msg = (error as Error)?.message ?? '';
+      if (
+        msg.toLowerCase().includes('denied') ||
+        msg.toLowerCase().includes('permission') ||
+        msg.toLowerCase().includes('cancelled') ||
+        msg.toLowerCase().includes('canceled')
+      ) {
+        await this.showToast(
+          "Accès à la caméra refusé. Veuillez l'autoriser dans les paramètres de l'application.",
+          'warning'
+        );
+      } else {
+        await this.showToast('Impossible de prendre une photo.', 'danger');
+      }
+    } finally {
+      this.isTaking = false;
     }
   }
 
@@ -58,10 +77,46 @@ export class Tab1Page implements OnInit {
       }
     });
     await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.deleted) {
+      await this.showToast('Photo supprimée.', 'success');
+    }
+  }
+
+  async toggleLike(photo: UserPhoto, event: Event): Promise<void> {
+    event.stopPropagation();
+    await this.photoService.toggleLike(photo);
+    const msg = photo.liked ? 'Photo ajoutée aux favoris !' : 'Favori retiré.';
+    await this.showToast(msg, photo.liked ? 'success' : 'medium');
+  }
+
+  async confirmDelete(photo: UserPhoto, event: Event): Promise<void> {
+    event.stopPropagation();
+    const alert = await this.alertController.create({
+      header: 'Supprimer la photo',
+      message: 'Êtes-vous sûr de vouloir supprimer cette photo définitivement ?',
+      buttons: [
+        { text: 'Annuler', role: 'cancel' },
+        {
+          text: 'Supprimer',
+          role: 'destructive',
+          handler: async () => {
+            await this.photoService.deletePhoto(photo);
+            await this.showToast('Photo supprimée.', 'success');
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   private async showToast(message: string, color: string): Promise<void> {
-    const toast = await this.toastController.create({ message, duration: 2500, color });
+    const toast = await this.toastController.create({
+      message,
+      duration: 2500,
+      color,
+      position: 'bottom'
+    });
     await toast.present();
   }
 }
