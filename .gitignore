@@ -12,8 +12,10 @@
 /package-lock.json
 /yarn.lock
 
-# Environment files
+# Environment files (contiennent des tokens secrets)
 /.env
+SnapMapApp/src/environments/environment.ts
+SnapMapApp/src/environments/environment.prod.ts
 
 # Angular CLI and build artefacts
 /.angular-cli.json
