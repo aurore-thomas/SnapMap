@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
@@ -6,7 +6,7 @@ import {
   IonIcon, IonSpinner, ModalController, ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { cameraOutline, imageOutline } from 'ionicons/icons';
+import { cameraOutline, imageOutline, camera } from 'ionicons/icons';
 import { PhotoService } from '../core/services/photo';
 import { UserPhoto } from '../core/models/user-photo.model';
 import { PhotoDetailComponent } from '../features/photo-detail/photo-detail.component';
@@ -25,13 +25,13 @@ import { PhotoDetailComponent } from '../features/photo-detail/photo-detail.comp
 })
 export class Tab1Page implements OnInit {
   isTaking = false;
+  public photoService = inject(PhotoService);
 
   constructor(
-    public photoService: PhotoService,
     private modalController: ModalController,
     private toastController: ToastController
   ) {
-    addIcons({ cameraOutline, imageOutline });
+    addIcons({ cameraOutline, imageOutline, camera });
   }
 
   async ngOnInit(): Promise<void> {
@@ -40,11 +40,12 @@ export class Tab1Page implements OnInit {
 
   async takePhoto(): Promise<void> {
     this.isTaking = true;
-    const photo = await this.photoService.takePhoto();
-    this.isTaking = false;
-
-    if (!photo) {
+    try {
+      await this.photoService.takePhoto();
+    } catch (e) {
       await this.showToast('Impossible de prendre une photo.', 'danger');
+    } finally {
+      this.isTaking = false;
     }
   }
 
